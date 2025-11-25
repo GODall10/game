@@ -2,9 +2,11 @@ package org.example.game;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.media.AudioClip;
 
 public class sprite {
     static Image image;
+    AudioClip clipjmp = new  AudioClip(getClass().getResource("jump.mp3").toExternalForm());
     double x;
     double heightp=250;
     double height=90;
@@ -42,6 +44,7 @@ public class sprite {
             velY = -20;  // forza del salto verso l'alto
             grounded = false;
             sprite.image= new Image(getClass().getResource("dino-jump.png").toExternalForm());
+            clipjmp.play();
         }
         sprite.image=new Image(getClass().getResource("dino-run.gif").toExternalForm());
     }

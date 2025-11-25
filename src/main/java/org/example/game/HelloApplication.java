@@ -10,12 +10,14 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class HelloApplication extends Application {
+
     double playerx = 50;
     int width = 750;
     int height = 250;
@@ -37,10 +39,10 @@ public class HelloApplication extends Application {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Image Playersprite = new Image(getClass().getResource("dino-run.gif").toExternalForm());
         player = new sprite(50,(height-dinoHeight),dinoWidth,dinoHeight);
-
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.SPACE) {
                 player.jump();
+
             }
         });
 

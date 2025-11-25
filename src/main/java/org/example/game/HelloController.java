@@ -2,8 +2,10 @@ package org.example.game;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.media.AudioClip;
 
 public class HelloController {
+
     @FXML
     private Label welcomeText;
 
