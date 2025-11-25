@@ -1,10 +1,11 @@
 package org.example.game;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.media.AudioClip;
 
-public class sprite {
+public class Sprite {
     static Image image;
     AudioClip clipjmp = new  AudioClip(getClass().getResource("jump.mp3").toExternalForm());
     double x;
@@ -14,9 +15,11 @@ public class sprite {
     double width=88;
     double velY;
     double gravity=1;
+    double paddingX = 10;
+    double paddingY = 10;
     boolean grounded= true;
     private final double groundY = 250;
-    public sprite( double x, double y, double width, double height) {
+    public Sprite(double x, double y, double width, double height) {
         this.image = new Image(getClass().getResource("dino-run.gif").toExternalForm());;
         this.x = x;
         this.y = y;
@@ -41,12 +44,18 @@ public class sprite {
 
     public void jump(){
         if (grounded==true) {
-            velY = -20;  // forza del salto verso l'alto
+            velY = -21;  // forza del salto verso l'alto
             grounded = false;
-            sprite.image= new Image(getClass().getResource("dino-jump.png").toExternalForm());
+            Sprite.image= new Image(getClass().getResource("dino-jump.png").toExternalForm());
             clipjmp.play();
         }
-        sprite.image=new Image(getClass().getResource("dino-run.gif").toExternalForm());
+        Sprite.image=new Image(getClass().getResource("dino-run.gif").toExternalForm());
+    }
+    public boolean collidesWith(Rectangle2D a, Rectangle2D b) {
+        return a.intersects(b);
+    }
+    public Rectangle2D getBounds() {
+        return new Rectangle2D(x+10, y+10, width-20, height-10);
     }
 
 
