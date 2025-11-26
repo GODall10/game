@@ -26,7 +26,8 @@ public class HelloApplication extends Application {
     Image cactus3 = new  Image(getClass().getResource("cactus3.png").toExternalForm());
     Image gameovr = new   Image(getClass().getResource("game-over.png").toExternalForm());
     Image reset = new   Image(getClass().getResource("reset.png").toExternalForm());
-    Image trk = new   Image(getClass().getResource("track.png").toExternalForm());
+
+    Image bird = new Image(getClass().getResource("bird2.png").toExternalForm());
 
     Image dead = new   Image(getClass().getResource("dino-dead.png").toExternalForm());
     AnimationTimer gameTimer;
@@ -41,7 +42,7 @@ public class HelloApplication extends Application {
     int velocityY=0;
     int gravity = 1;
     int numgen = 0;
-    int max = 1000;
+    int max = 1200;
     int min = 0;
     boolean gameOver = false;
     double playery = height - dinoHeight;
@@ -91,8 +92,13 @@ public class HelloApplication extends Application {
 
             }
             if (event.getCode() == KeyCode.DOWN) {
-
+                player.duck();
             }
+        });
+        scene.setOnKeyReleased(event -> {
+           if (event.getCode() == KeyCode.DOWN) {
+               player.resetduck();
+           }
         });
 
         stage.setScene(scene);
@@ -134,6 +140,8 @@ public class HelloApplication extends Application {
                         cactus = new Cactus(100, cactus2);
                     }else if (numgen > 950 && numgen < 1000) {
                         cactus = new Cactus(100, cactus3);
+                    }else if (numgen > 1000) {
+                        cactus = new Cactus(62, bird);
                     }
                 }
                 if (cactus != null) {

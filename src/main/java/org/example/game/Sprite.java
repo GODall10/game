@@ -9,18 +9,27 @@ public class Sprite {
     public enum State {
         RUNNING,
         JUMPING,
-        DEAD
+        DEAD,
+        DUCK
     }
     private State state = State.RUNNING;
     private Image runImg;
     private Image jumpImg;
     private Image deadImg;
+    private Image duckImg;
     private Rectangle2D bounds;
     AudioClip clipjmp = new  AudioClip(getClass().getResource("jump.mp3").toExternalForm());
+    private double duckRatio;
 
     double x;
     double heightp=250;
     double height=90;
+
+    private static double startHeight=90;
+    private static double startWidth=88;
+
+    private static double startX;
+    private static double startY;
     double y;
     double width=88;
     double velY;
@@ -28,6 +37,9 @@ public class Sprite {
     double paddingX = 10;
     double paddingY = 10;
     boolean grounded= true;
+    double duckHeight = 55;
+    double duckWidth = 115;
+    double ducky;
     private final double groundY = 250;
     public Sprite(double x, double y, double width, double height) {
         this.x = x;
@@ -38,6 +50,15 @@ public class Sprite {
         runImg = new Image(getClass().getResource("dino-run.gif").toExternalForm());
         jumpImg = new Image(getClass().getResource("dino-jump.png").toExternalForm());
         deadImg = new Image(getClass().getResource("dino-dead.png").toExternalForm());
+        duckImg = new Image(getClass().getResource("dino-duck.gif").toExternalForm());
+        this.duckHeight = duckHeight;
+        this.duckWidth = duckWidth;
+        this.ducky=250-duckHeight;
+        duckRatio = duckImg.getWidth() / duckImg.getHeight();
+        this.startX = x;
+        this.startY = y;
+        this.startHeight = width;
+        this.startWidth = height;
     }
     public void draw(GraphicsContext gc) {
         Image imgtoDraw;
@@ -51,6 +72,9 @@ public class Sprite {
                 break;
             case DEAD:
                 imgtoDraw =  deadImg;
+                break;
+            case DUCK:
+                imgtoDraw =  duckImg;
                 break;
             default:
                 imgtoDraw = runImg;
@@ -70,8 +94,11 @@ public class Sprite {
                 velY = 0;
                 grounded = true;
 
-                if (state != State.DEAD) {
+                if (state != State.DEAD && state != State.DUCK) {
                     state = State.RUNNING;
+                    height = startHeight;
+                    width = startWidth;
+
                 }
 
             }else{
@@ -103,5 +130,23 @@ public class Sprite {
 
     public void die() {
         state = State.DEAD;
+    }
+    public void duck() {
+        if (grounded && state != State.DEAD) {
+            state = State.DUCK;
+            height = duckHeight;
+            width = height * duckRatio; // mantieni proporzioni
+            y = groundY - height;       // abbassati
+            bounds = new Rectangle2D(x + 10, y + 10, width - 20, height - 10);
+        }
+    }
+    public void resetduck() {
+        if (grounded && state != State.DEAD) {
+            state = State.RUNNING;
+            height = startHeight;
+            width = startWidth;
+            y = groundY - height;
+            bounds = new Rectangle2D(x + 10, y + 10, width - 20, height - 10);
+        }
     }
 }
