@@ -3,12 +3,14 @@ package org.example.game;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.CacheHint;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class HelloApplication extends Application {
@@ -54,7 +56,12 @@ public class HelloApplication extends Application {
         Image Playersprite = new Image(getClass().getResource("dino-run.gif").toExternalForm());
         player = new Sprite(50,(height-dinoHeight),dinoWidth,dinoHeight);
         cactus = new Cactus(100,cactus1);
-        track = new Track(trk);
+        track = new Track(10);
+        System.setProperty("prism.order", "d3d");
+        System.setProperty("prism.forceGPU", "true");
+        canvas.setCache(true);
+        canvas.setCacheHint(CacheHint.SPEED);
+
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.SPACE) {
                 player.jump();
@@ -102,6 +109,7 @@ public class HelloApplication extends Application {
                     if (cactus.x +cactus.width < 0) {
                         cactus = null;
                     }
+
                 }
 
                 // update degli sprite
@@ -112,8 +120,9 @@ public class HelloApplication extends Application {
                 // draw degli sprite
                 player.draw(gc);
                 track.draw(gc);
-                //block.draw(gc);
-                track.update();
+
+                track.update(1);
+
                 // collisioni
                 if(cactus != null) {
                     if (player.getBounds().intersects(cactus.getBounds())) {

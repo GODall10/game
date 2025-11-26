@@ -10,7 +10,7 @@ public class Cactus {
     double x = 700;
     double y = 0;
     double width = 0;
-    double speed = -5;
+    double speed = -7;
 
     public Cactus(double height, Image image) {
         this.height = height;

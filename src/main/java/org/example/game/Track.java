@@ -4,34 +4,44 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class Track {
+    Image track;
+    private double offset= 0;
+    private double speed;
     Image image;
     double x1 = 0;
     double x2;
-    double width=0;//image.getWidth();
+    double width=750;//image.getWidth();
     double height =0; //image.getHeight();
     double y = 0;
-    double speed = -6;
-    public Track(Image image) {
-        this.image = image;
-        this.width = image.getWidth();
-        this.height = image.getHeight();
-        this.y = 250-height;
+    double tileWidth;
+    double tileHeight;
+    double x = 0;
+
+    public Track(int speed) {
+        this.speed = speed;
+        track = new Image(getClass().getResource("track.png").toExternalForm());
+        tileWidth = 800;
+        tileHeight = 25;
     }
-    void update(){
-        this.x1 -= speed;
-        this.x2 -= speed;
+    void update(double dt){
+        offset -= speed * dt;
 
-        // se la prima esce, riportala dietro la seconda
-        if (x1 + width <= 0) {
-            x1 = x2 + width;
-        }
-
-        // se la seconda esce, riportala dietro la prima
-        if (x2 + width <= 0) {
-            x2 = x1 + width;
+        if (offset <= -tileWidth) {
+            offset += tileWidth;
         }
     }
     void draw(GraphicsContext gc){
-        gc.drawImage(image,x1,y,width,height);
+        for (int i = -1; i <= width / tileWidth + 1; i++) {
+             x = i * tileWidth + offset;
+            gc.drawImage(
+                    track,
+                    x,
+                    250-tileHeight,
+                    tileWidth,
+                    tileHeight
+            );
+
+        }
+
     }
 }
