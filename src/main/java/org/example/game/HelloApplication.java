@@ -7,13 +7,17 @@ import javafx.scene.CacheHint;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+
 public class HelloApplication extends Application {
+
     Image bigcactus1 = new  Image(getClass().getResource("big-cactus1.png").toExternalForm());
     Image bigcactus2 = new  Image(getClass().getResource("big-cactus2.png").toExternalForm());
     Image bigcactus3 = new  Image(getClass().getResource("big-cactus3.png").toExternalForm());
@@ -23,8 +27,11 @@ public class HelloApplication extends Application {
     Image gameovr = new   Image(getClass().getResource("game-over.png").toExternalForm());
     Image reset = new   Image(getClass().getResource("reset.png").toExternalForm());
     Image trk = new   Image(getClass().getResource("track.png").toExternalForm());
-    AnimationTimer gameTimer;
 
+    Image dead = new   Image(getClass().getResource("dino-dead.png").toExternalForm());
+    AnimationTimer gameTimer;
+    AudioClip clipup = new  AudioClip(getClass().getResource("100up.mp3").toExternalForm());
+    Label score;
     double playerx = 50;
     int width = 750;
     int height = 250;
@@ -41,22 +48,30 @@ public class HelloApplication extends Application {
     private Sprite player;
     private Cactus cactus;
     private Track track;
+    private double contdouble;
     private double paddingy = 10;
     private double paddingx = 10;
     Rectangle2D playerbounds;
     Rectangle2D cactusbounds;
     Pane root = new Pane();
+    private long lastTime = 0;
+    private double scoreDouble = 0;
     Canvas canvas;
     @Override
     public void start(Stage stage) {
+        score = new Label("Score:");
+        score.setLayoutX(40);
+        score.setLayoutY(40);
+        score.setStyle("-fx-font-size: 20;");
         canvas = new Canvas(width, height);
         root.getChildren().add(canvas);
+        root.getChildren().add(score);
         Scene scene= new Scene(root,width,height);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Image Playersprite = new Image(getClass().getResource("dino-run.gif").toExternalForm());
         player = new Sprite(50,(height-dinoHeight),dinoWidth,dinoHeight);
         cactus = new Cactus(100,cactus1);
-        track = new Track(10);
+        track = new Track(13);
         System.setProperty("prism.order", "d3d");
         System.setProperty("prism.forceGPU", "true");
         canvas.setCache(true);
@@ -66,10 +81,16 @@ public class HelloApplication extends Application {
             if (event.getCode() == KeyCode.SPACE) {
                 player.jump();
                 if(gameOver == true) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {}
                     gameOver = false;
                     cactus = null;
                     gameTimer.start();
                 }
+
+            }
+            if (event.getCode() == KeyCode.DOWN) {
 
             }
         });
@@ -84,6 +105,18 @@ public class HelloApplication extends Application {
          gameTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                if(lastTime == 0) {
+                    lastTime = now;
+                }
+                double deltaSeconds = (now - lastTime) / 1_000_000_000.0; // nanosecondi → secondi
+                lastTime = now;
+                scoreDouble += deltaSeconds * 10;
+                contdouble += deltaSeconds * 10;
+                if(contdouble >= 100) {
+                    clipup.play();
+                    contdouble = 0;
+                }
+                score.setText("score: " + (int)scoreDouble);
 
                 gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
                 if(cactus==null) {
@@ -126,12 +159,36 @@ public class HelloApplication extends Application {
                 // collisioni
                 if(cactus != null) {
                     if (player.getBounds().intersects(cactus.getBounds())) {
-                        gc.drawImage(gameovr,200,50);
-                        gc.drawImage(reset,350,100);
+
+                        player.die(); // cambia stato a DEAD
+
+                        // ridisegno tutto sul canvas prima di fermare il timer
+                        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                        track.draw(gc);
+                        if (cactus != null) cactus.draw(gc);
+                        player.draw(gc);  // ora mostra DEAD
+
+                        gc.drawImage(gameovr, 200, 50);
+                        gc.drawImage(reset, 350, 100);
+
                         gameTimer.stop();
+                        scoreDouble = 0;
+                        contdouble = 0;
+                        score.setText("score: " + (int)scoreDouble);
+
+
                         gameOver = true;
+
                     }
                 }
+                if(scoreDouble >= 500&&cactus!=null) {
+                    cactus.speed = -11;
+                }else if(scoreDouble >= 2000&&cactus!=null) {
+                    cactus.speed = -13;
+                }
+
+
+
             }
         } ; gameTimer.start();
     }
