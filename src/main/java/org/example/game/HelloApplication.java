@@ -15,6 +15,8 @@ import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 
 public class HelloApplication extends Application {
 
@@ -33,6 +35,7 @@ public class HelloApplication extends Application {
     AnimationTimer gameTimer;
     AudioClip clipup = new  AudioClip(getClass().getResource("100up.mp3").toExternalForm());
     Label score;
+    ArrayList<Cactus> enemies = new ArrayList<Cactus>();
     double playerx = 50;
     int width = 750;
     int height = 250;
@@ -42,8 +45,9 @@ public class HelloApplication extends Application {
     int velocityY=0;
     int gravity = 1;
     int numgen = 0;
-    int max = 1200;
+    int max = 1000;
     int min = 0;
+    double spawntimer;
     boolean gameOver = false;
     double playery = height - dinoHeight;
     private Sprite player;
@@ -125,47 +129,27 @@ public class HelloApplication extends Application {
                 score.setText("score: " + (int)scoreDouble);
 
                 gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-                if(cactus==null) {
-                    int numgen = (int) (Math.random() * ((max - min) + 1)) + min;
-                    if (numgen < 500) {
-                    } else if (numgen > 500 && numgen < 550) {
-                        cactus = new Cactus(100, bigcactus1);
-                    } else if (numgen > 550 &&  numgen < 575) {
-                        cactus = new Cactus(100, bigcactus2);
-                    }else if (numgen > 575 && numgen < 600) {
-                        cactus = new Cactus(100, bigcactus3);
-                    }else if (numgen > 600 && numgen < 850) {
-                        cactus = new Cactus(100, cactus1);
-                    }else if (numgen > 850&& numgen < 950) {
-                        cactus = new Cactus(100, cactus2);
-                    }else if (numgen > 950 && numgen < 1000) {
-                        cactus = new Cactus(100, cactus3);
-                    }else if (numgen > 1000) {
-                        cactus = new Cactus(62, bird);
+                spawntimer += deltaSeconds;
+                if (enemies.isEmpty()) {
+                    spawnEnemy();
+                } else {
+                    Cactus last = enemies.get(enemies.size() - 1);
+
+                    // se l'ultimo è abbastanza lontano dalla destra → spawn
+                    if (last.x < width - 500) {
+                        spawnEnemy();
                     }
                 }
-                if (cactus != null) {
+
+                for (int i = 0; i < enemies.size(); i++) {
+                    cactus = enemies.get(i);
                     cactus.draw(gc);
                     cactus.update();
-                    if (cactus.x +cactus.width < 0) {
-                        cactus = null;
+                    if (cactus.x + cactus.width < 0) {
+                        enemies.remove(i);
+                        i--;
+                        continue;
                     }
-
-                }
-
-                // update degli sprite
-                player.update();
-
-                //block.update(); // se il blocco non si muove, resta vuoto
-
-                // draw degli sprite
-                player.draw(gc);
-                track.draw(gc);
-
-                track.update(1);
-
-                // collisioni
-                if(cactus != null) {
                     if (player.getBounds().intersects(cactus.getBounds())) {
 
                         player.die(); // cambia stato a DEAD
@@ -174,7 +158,8 @@ public class HelloApplication extends Application {
                         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
                         track.draw(gc);
                         if (cactus != null) cactus.draw(gc);
-                        player.draw(gc);  // ora mostra DEAD
+                        player.draw(gc);
+                        enemies.clear();// ora mostra DEAD
 
                         gc.drawImage(gameovr, 200, 50);
                         gc.drawImage(reset, 350, 100);
@@ -189,9 +174,24 @@ public class HelloApplication extends Application {
 
                     }
                 }
-                if(scoreDouble >= 500&&cactus!=null) {
+
+
+                // update degli sprite
+                player.update();
+
+                //block.update(); // se il blocco non si muove, resta vuoto
+
+                // draw degli sprite
+                player.draw(gc);
+                track.draw(gc);
+
+                track.update(1);
+
+                // collisioni
+
+                if(scoreDouble >= 500&&enemies.size()!=0) {
                     cactus.speed = -11;
-                }else if(scoreDouble >= 2000&&cactus!=null) {
+                }else if(scoreDouble >= 2000&&enemies.size()!=0) {
                     cactus.speed = -13;
                 }
 
@@ -203,5 +203,27 @@ public class HelloApplication extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+    private void spawnEnemy() {
+        int numgen = (int) (Math.random() * 1000);
+
+        if (numgen < 100) {
+            enemies.add(new Cactus(100, bigcactus1));
+        }
+        else if (numgen < 200) {
+            enemies.add(new Cactus(100, bigcactus2));
+        }
+        else if (numgen < 300) {
+            enemies.add(new Cactus(100, bigcactus3));
+        }
+        else if (numgen < 600) {
+            enemies.add(new Cactus(100,cactus1));
+        }
+        else if (numgen < 800) {
+            enemies.add(new Cactus(100,cactus2));
+        }
+        else {
+            enemies.add(new Cactus(100,cactus3));
+        }
     }
 }
