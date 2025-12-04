@@ -1,6 +1,8 @@
 package org.example.game;
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.CacheHint;
@@ -14,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -76,7 +79,7 @@ public class HelloApplication extends Application {
         Image Playersprite = new Image(getClass().getResource("dino-run.gif").toExternalForm());
         player = new Sprite(50,(height-dinoHeight),dinoWidth,dinoHeight);
         cactus = new Cactus(100,cactus1);
-        track = new Track(13);
+        track = new Track(11);
         System.setProperty("prism.order", "d3d");
         System.setProperty("prism.forceGPU", "true");
         canvas.setCache(true);
@@ -84,14 +87,22 @@ public class HelloApplication extends Application {
 
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.SPACE) {
-                player.jump();
-                if(gameOver == true) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {}
-                    gameOver = false;
-                    cactus = null;
-                    gameTimer.start();
+
+                if(gameOver) {
+                    Timeline delay = new Timeline(new KeyFrame(Duration.millis(500),e-> {
+                        gameOver = false;
+                        cactus = null;
+                        player.setState("RUNNING");
+                        lastTime = 0;     // IMPORTANTE per evitare punteggi sfasati
+                        scoreDouble = 0;
+                        contdouble = 0;
+                        gameTimer.start();
+                    }));
+                    delay.setCycleCount(1);
+                    delay.play();
+                    return;
+                } else {
+                    player.jump();
                 }
 
             }
@@ -109,6 +120,7 @@ public class HelloApplication extends Application {
         stage.show();
         stage.requestFocus();
         gameLoop(gc);
+        gameTimer.start();
     }
 
     private void gameLoop(GraphicsContext gc) {
@@ -136,7 +148,7 @@ public class HelloApplication extends Application {
                     Cactus last = enemies.get(enemies.size() - 1);
 
                     // se l'ultimo è abbastanza lontano dalla destra → spawn
-                    if (last.x < width - 500) {
+                    if (last.x < width - ((int)(Math.random() * ((750 - 380) + 1)) + 380)) {
                         spawnEnemy();
                     }
                 }
@@ -150,6 +162,14 @@ public class HelloApplication extends Application {
                         i--;
                         continue;
                     }
+                    if(scoreDouble>400){
+                        cactus.speed=-10;
+                    }else if(scoreDouble>1000){
+                        cactus.speed=-11;
+                    } else if (scoreDouble>2500) {
+                        cactus.speed=-12;
+                    }
+
                     if (player.getBounds().intersects(cactus.getBounds())) {
 
                         player.die(); // cambia stato a DEAD
@@ -168,37 +188,21 @@ public class HelloApplication extends Application {
                         scoreDouble = 0;
                         contdouble = 0;
                         score.setText("score: " + (int)scoreDouble);
-
-
                         gameOver = true;
-
+                        return;
                     }
                 }
 
 
                 // update degli sprite
                 player.update();
-
-                //block.update(); // se il blocco non si muove, resta vuoto
-
                 // draw degli sprite
                 player.draw(gc);
                 track.draw(gc);
 
                 track.update(1);
-
-                // collisioni
-
-                if(scoreDouble >= 500&&enemies.size()!=0) {
-                    cactus.speed = -11;
-                }else if(scoreDouble >= 2000&&enemies.size()!=0) {
-                    cactus.speed = -13;
-                }
-
-
-
             }
-        } ; gameTimer.start();
+        } ;
     }
 
     public static void main(String[] args) {

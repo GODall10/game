@@ -149,4 +149,12 @@ public class Sprite {
             bounds = new Rectangle2D(x + 10, y + 10, width - 20, height - 10);
         }
     }
+    public void setState(String string) {
+        switch (string) {
+            case "RUNNING"-> this.state = State.RUNNING;
+            case "DEAD"-> this.state = State.DEAD;
+            case "DUCK"-> this.state = State.DUCK;
+            case "JUMPING"-> this.state = State.JUMPING;
+        }
+    }
 }
